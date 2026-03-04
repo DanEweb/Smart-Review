@@ -25,12 +25,17 @@ import {
   Sun,
   Moon,
   Check,
+  Share2,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/lib/supabase/auth-context";
 import { useTheme } from "next-themes";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -76,10 +81,14 @@ function ToolbarButton({
 
 export function EditorToolbar({ editor, onToggleDataPanel, isDataPanelOpen, onToggleCollab, isCollabActive, onStartPresentation, onExportPDF, onExportPNG }: EditorToolbarProps) {
   const { t } = useI18n();
+  const { user, signOut, isSupabaseConfigured } = useAuth();
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -88,12 +97,15 @@ export function EditorToolbar({ editor, onToggleDataPanel, isDataPanelOpen, onTo
       if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
         setShowExportMenu(false);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
     };
-    if (showExportMenu) {
+    if (showExportMenu || showUserMenu) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showExportMenu]);
+  }, [showExportMenu, showUserMenu]);
 
   const noEditor = !editor;
 
@@ -291,6 +303,45 @@ export function EditorToolbar({ editor, onToggleDataPanel, isDataPanelOpen, onTo
               <Moon className="w-4 h-4" />
             )}
           </ToolbarButton>
+        )}
+
+        {/* User menu */}
+        {isSupabaseConfigured && user && (
+          <>
+            <Separator orientation="vertical" className="h-5 mx-1" />
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setShowUserMenu((v) => !v)}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                title={user.email || ""}
+              >
+                <div className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold">
+                  {(user.email?.[0] || "U").toUpperCase()}
+                </div>
+              </button>
+              {showUserMenu && (
+                <div className="absolute right-0 top-full mt-1 bg-popover border border-border rounded-lg shadow-lg py-1 z-50 min-w-[180px]">
+                  <div className="px-3 py-2 border-b border-border">
+                    <p className="text-xs font-medium truncate">{user.email}</p>
+                  </div>
+                  <button
+                    onClick={() => { router.push("/dashboard"); setShowUserMenu(false); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    ダッシュボード
+                  </button>
+                  <button
+                    onClick={() => { signOut(); setShowUserMenu(false); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-accent"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    ログアウト
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>
