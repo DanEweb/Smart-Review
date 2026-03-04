@@ -8,6 +8,7 @@ const en: TranslationKeys = {
     expand: "Expand",
     noResults: "No results",
     save: "Save",
+    saved: "Saved",
     cancel: "Cancel",
     delete: "Delete",
     edit: "Edit",

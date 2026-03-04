@@ -8,6 +8,7 @@ const ko: TranslationKeys = {
     expand: "확대",
     noResults: "결과 없음",
     save: "저장",
+    saved: "저장됨",
     cancel: "취소",
     delete: "삭제",
     edit: "편집",

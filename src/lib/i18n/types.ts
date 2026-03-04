@@ -5,6 +5,7 @@ export interface TranslationKeys {
     expand: string;
     noResults: string;
     save: string;
+    saved: string;
     cancel: string;
     delete: string;
     edit: string;

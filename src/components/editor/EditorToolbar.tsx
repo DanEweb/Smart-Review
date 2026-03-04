@@ -24,6 +24,7 @@ import {
   Image as ImageIcon,
   Sun,
   Moon,
+  Check,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -224,6 +225,11 @@ export function EditorToolbar({ editor, onToggleDataPanel, isDataPanelOpen, onTo
       </ToolbarButton>
 
       <div className="ml-auto flex items-center gap-1">
+        {/* Auto-save indicator */}
+        <span className="flex items-center gap-1 text-[11px] text-muted-foreground/60 mr-1">
+          <Check className="w-3 h-3" />
+          <span className="hidden sm:inline">{t.common.saved ?? "Saved"}</span>
+        </span>
         {/* Export dropdown */}
         <div className="relative" ref={exportMenuRef}>
           <ToolbarButton

@@ -16,7 +16,7 @@ import { buildChartOption } from "@/lib/charts/option-builder";
 import { demoSalesData, demoChartConfig } from "@/lib/demo-data";
 import { useEditorStore } from "@/stores/editor-store";
 import { useI18n } from "@/lib/i18n";
-import { Maximize2, Settings } from "lucide-react";
+import { BarChart3, Maximize2, Settings } from "lucide-react";
 import type { ChartConfig } from "@/types/blocks";
 
 echarts.use([
@@ -66,35 +66,53 @@ export function ChartBlockView({ node, updateAttributes }: any) {
     }
   }, [isFullscreen]);
 
+  const isDemo = !node.attrs.dataSourceId;
+
   return (
     <NodeViewWrapper className="my-4">
       <div
-        className={`relative group border border-border rounded-lg bg-card overflow-hidden ${
+        className={`relative border border-border rounded-lg bg-card overflow-hidden ${
           isFullscreen
             ? "fixed inset-4 z-50 bg-background shadow-2xl"
             : ""
         }`}
       >
-        <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => selectBlock(node.attrs.blockId)}
-            className="p-1.5 rounded-md bg-background/80 hover:bg-accent border border-border"
-            title={t.common.settings}
-          >
-            <Settings className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 rounded-md bg-background/80 hover:bg-accent border border-border"
-            title={t.common.expand}
-          >
-            <Maximize2 className="w-4 h-4" />
-          </button>
+        {/* Always-visible toolbar */}
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-border bg-muted/30">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span className="font-medium">
+              {config.title || t.slashCommand.chart.title}
+            </span>
+            {isDemo && (
+              <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                DEMO
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => selectBlock(node.attrs.blockId)}
+              className="flex items-center gap-1 px-2 py-1 text-xs rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              title={t.common.settings}
+            >
+              <Settings className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t.common.settings}</span>
+            </button>
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-1 rounded-md hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+              title={t.common.expand}
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
         <div
           ref={chartRef}
-          className={isFullscreen ? "w-full h-full" : "w-full h-[400px]"}
+          className={isFullscreen ? "w-full h-full" : "w-full h-[400px] cursor-pointer"}
+          onClick={() => !isFullscreen && selectBlock(node.attrs.blockId)}
         />
 
         {isFullscreen && (

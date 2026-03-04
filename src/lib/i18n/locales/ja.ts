@@ -8,6 +8,7 @@ const ja: TranslationKeys = {
     expand: "拡大",
     noResults: "結果なし",
     save: "保存",
+    saved: "保存済み",
     cancel: "キャンセル",
     delete: "削除",
     edit: "編集",

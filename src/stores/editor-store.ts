@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { nanoid } from "nanoid";
 
 export interface PageTab {
@@ -44,93 +45,108 @@ interface EditorState {
 
 const defaultTabId = nanoid();
 
-export const useEditorStore = create<EditorState>((set, get) => ({
-  selectedBlockId: null,
-  isConfigPanelOpen: false,
-  isSidebarOpen: true,
-  pinnedBlockIds: [],
+export const useEditorStore = create<EditorState>()(
+  persist(
+    (set, get) => ({
+      selectedBlockId: null,
+      isConfigPanelOpen: false,
+      isSidebarOpen: true,
+      pinnedBlockIds: [],
 
-  tabs: [
-    {
-      id: defaultTabId,
-      title: "",
-      content: "",
-      createdAt: Date.now(),
-    },
-  ],
-  activeTabId: defaultTabId,
-  splitTabId: null,
-  collabRoomId: null,
-
-  setCollabRoom: (roomId) =>
-    set({ collabRoomId: roomId }),
-
-  selectBlock: (id) =>
-    set({ selectedBlockId: id, isConfigPanelOpen: id !== null }),
-
-  toggleConfigPanel: (open) =>
-    set((state) => ({
-      isConfigPanelOpen: open ?? !state.isConfigPanelOpen,
-    })),
-
-  toggleSidebar: (open) =>
-    set((state) => ({
-      isSidebarOpen: open ?? !state.isSidebarOpen,
-    })),
-
-  pinBlock: (id) =>
-    set((state) => {
-      if (state.pinnedBlockIds.includes(id)) return state;
-      if (state.pinnedBlockIds.length >= 2) return state;
-      return { pinnedBlockIds: [...state.pinnedBlockIds, id] };
-    }),
-
-  unpinBlock: (id) =>
-    set((state) => ({
-      pinnedBlockIds: state.pinnedBlockIds.filter((bid) => bid !== id),
-    })),
-
-  addTab: (title) => {
-    const id = nanoid();
-    set((state) => ({
       tabs: [
-        ...state.tabs,
         {
-          id,
-          title: title || "",
+          id: defaultTabId,
+          title: "",
           content: "",
           createdAt: Date.now(),
         },
       ],
-      activeTabId: id,
-    }));
-    return id;
-  },
+      activeTabId: defaultTabId,
+      splitTabId: null,
+      collabRoomId: null,
 
-  removeTab: (id) =>
-    set((state) => {
-      if (state.tabs.length <= 1) return state;
-      const newTabs = state.tabs.filter((t) => t.id !== id);
-      const newActive =
-        state.activeTabId === id ? newTabs[0].id : state.activeTabId;
-      const newSplit =
-        state.splitTabId === id ? null : state.splitTabId;
-      return { tabs: newTabs, activeTabId: newActive, splitTabId: newSplit };
+      setCollabRoom: (roomId) =>
+        set({ collabRoomId: roomId }),
+
+      selectBlock: (id) =>
+        set({ selectedBlockId: id, isConfigPanelOpen: id !== null }),
+
+      toggleConfigPanel: (open) =>
+        set((state) => ({
+          isConfigPanelOpen: open ?? !state.isConfigPanelOpen,
+        })),
+
+      toggleSidebar: (open) =>
+        set((state) => ({
+          isSidebarOpen: open ?? !state.isSidebarOpen,
+        })),
+
+      pinBlock: (id) =>
+        set((state) => {
+          if (state.pinnedBlockIds.includes(id)) return state;
+          if (state.pinnedBlockIds.length >= 2) return state;
+          return { pinnedBlockIds: [...state.pinnedBlockIds, id] };
+        }),
+
+      unpinBlock: (id) =>
+        set((state) => ({
+          pinnedBlockIds: state.pinnedBlockIds.filter((bid) => bid !== id),
+        })),
+
+      addTab: (title) => {
+        const id = nanoid();
+        set((state) => ({
+          tabs: [
+            ...state.tabs,
+            {
+              id,
+              title: title || "",
+              content: "",
+              createdAt: Date.now(),
+            },
+          ],
+          activeTabId: id,
+        }));
+        return id;
+      },
+
+      removeTab: (id) =>
+        set((state) => {
+          if (state.tabs.length <= 1) return state;
+          const newTabs = state.tabs.filter((t) => t.id !== id);
+          const newActive =
+            state.activeTabId === id ? newTabs[0].id : state.activeTabId;
+          const newSplit =
+            state.splitTabId === id ? null : state.splitTabId;
+          return { tabs: newTabs, activeTabId: newActive, splitTabId: newSplit };
+        }),
+
+      setActiveTab: (id) =>
+        set({ activeTabId: id }),
+
+      renameTab: (id, title) =>
+        set((state) => ({
+          tabs: state.tabs.map((t) => (t.id === id ? { ...t, title } : t)),
+        })),
+
+      saveTabContent: (id, content) =>
+        set((state) => ({
+          tabs: state.tabs.map((t) => (t.id === id ? { ...t, content } : t)),
+        })),
+
+      setSplitTab: (id) =>
+        set({ splitTabId: id }),
     }),
-
-  setActiveTab: (id) =>
-    set({ activeTabId: id }),
-
-  renameTab: (id, title) =>
-    set((state) => ({
-      tabs: state.tabs.map((t) => (t.id === id ? { ...t, title } : t)),
-    })),
-
-  saveTabContent: (id, content) =>
-    set((state) => ({
-      tabs: state.tabs.map((t) => (t.id === id ? { ...t, content } : t)),
-    })),
-
-  setSplitTab: (id) =>
-    set({ splitTabId: id }),
-}));
+    {
+      name: "smart-review-editor",
+      // Only persist data-related state, not ephemeral UI state
+      partialize: (state) => ({
+        tabs: state.tabs,
+        activeTabId: state.activeTabId,
+        splitTabId: state.splitTabId,
+        isSidebarOpen: state.isSidebarOpen,
+        pinnedBlockIds: state.pinnedBlockIds,
+      }),
+    }
+  )
+);
