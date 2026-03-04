@@ -46,6 +46,7 @@ interface EditorToolbarProps {
   onStartPresentation?: () => void;
   onExportPDF?: () => void;
   onExportPNG?: () => void;
+  onShare?: () => void;
 }
 
 function ToolbarButton({
@@ -79,7 +80,7 @@ function ToolbarButton({
   );
 }
 
-export function EditorToolbar({ editor, onToggleDataPanel, isDataPanelOpen, onToggleCollab, isCollabActive, onStartPresentation, onExportPDF, onExportPNG }: EditorToolbarProps) {
+export function EditorToolbar({ editor, onToggleDataPanel, isDataPanelOpen, onToggleCollab, isCollabActive, onStartPresentation, onExportPDF, onExportPNG, onShare }: EditorToolbarProps) {
   const { t } = useI18n();
   const { user, signOut, isSupabaseConfigured } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -271,6 +272,12 @@ export function EditorToolbar({ editor, onToggleDataPanel, isDataPanelOpen, onTo
           )}
         </div>
 
+        <ToolbarButton
+          onClick={() => onShare?.()}
+          title="共有"
+        >
+          <Share2 className="w-4 h-4" />
+        </ToolbarButton>
         <ToolbarButton
           onClick={() => onStartPresentation?.()}
           title={t.presentation.startPresentation}

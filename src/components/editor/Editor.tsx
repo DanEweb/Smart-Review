@@ -4,6 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { EditorToolbar } from "./EditorToolbar";
 import { ChartConfigPanel } from "./ChartConfigPanel";
 import { DataSourcePanel } from "./DataSourcePanel";
+import { ShareDialog } from "./ShareDialog";
 import { TabBar } from "./TabBar";
 import { EditorPane } from "./EditorPane";
 import { useEditorStore } from "@/stores/editor-store";
@@ -14,6 +15,7 @@ import { Menu, X } from "lucide-react";
 import { useState, useCallback, useRef } from "react";
 import type { Editor } from "@tiptap/react";
 import { nanoid } from "nanoid";
+import { useSearchParams } from "next/navigation";
 
 export function SmartReviewEditor() {
   const {
@@ -28,8 +30,11 @@ export function SmartReviewEditor() {
     setCollabRoom,
   } = useEditorStore();
   const { t } = useI18n();
+  const searchParams = useSearchParams();
+  const documentId = searchParams.get("doc") || undefined;
   const [isDataPanelOpen, setIsDataPanelOpen] = useState(false);
   const [showCollabDialog, setShowCollabDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const [collabInput, setCollabInput] = useState("");
   const [isPresentationMode, setIsPresentationMode] = useState(false);
 
@@ -119,6 +124,7 @@ export function SmartReviewEditor() {
               onStartPresentation={() => setIsPresentationMode(true)}
               onExportPDF={handleExportPDF}
               onExportPNG={handleExportPNG}
+              onShare={() => setShowShareDialog(true)}
             />
           </div>
         </div>
@@ -170,6 +176,13 @@ export function SmartReviewEditor() {
           onExit={() => setIsPresentationMode(false)}
         />
       )}
+
+      {/* Share Dialog */}
+      <ShareDialog
+        open={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        documentId={documentId}
+      />
 
       {/* Collaboration Room Dialog */}
       {showCollabDialog && (
